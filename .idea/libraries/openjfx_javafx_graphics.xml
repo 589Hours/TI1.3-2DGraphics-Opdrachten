@@ -3,9 +3,6 @@
     <properties maven-id="org.openjfx:javafx-graphics:20-ea+2" />
     <CLASSES>
       <root url="jar://$MAVEN_REPOSITORY$/org/openjfx/javafx-graphics/20-ea+2/javafx-graphics-20-ea+2.jar!/" />
-      <root url="jar://$MAVEN_REPOSITORY$/org/openjfx/javafx-graphics/20-ea+2/javafx-graphics-20-ea+2-win.jar!/" />
-      <root url="jar://$MAVEN_REPOSITORY$/org/openjfx/javafx-base/20-ea+2/javafx-base-20-ea+2.jar!/" />
-      <root url="jar://$MAVEN_REPOSITORY$/org/openjfx/javafx-base/20-ea+2/javafx-base-20-ea+2-win.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />
