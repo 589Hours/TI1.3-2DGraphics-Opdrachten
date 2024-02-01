@@ -22,19 +22,20 @@ public class Rainbow extends Application {
     public void draw(FXGraphics2D graphics) {
         graphics.translate(1920/2, 1000);
         graphics.scale(1,-1);
-        float radiusBinnen = 600f;
-        float radiusBuiten = 300;
-        double hoek = 0;
+        float radiusBinnen = 700;
+        float radiusBuiten = 500;
+        float step = 10000f;
 
 
-        for (int i = 0; i < 1000; i++) {
-            graphics.setColor(Color.getHSBColor((float) (i/1000.0f*Math.PI), 1, 1));
-            float x1 = radiusBinnen * (float)Math.cos(hoek);
-            float y1 = radiusBinnen * (float)Math.sin(hoek);
-            float x2 = radiusBuiten * (float)Math.cos(hoek);
-            float y2 = radiusBuiten * (float)Math.sin(hoek);
+        for (int i = 0; i < step; i++) {
+            graphics.setColor(Color.getHSBColor(i/step, 1, 1));
+            double cos = Math.cos( i/step * Math.PI);
+            double sin = Math.sin( i/step * Math.PI);
+            double x1 = radiusBinnen * cos;
+            double y1 = radiusBinnen * sin;
+            double x2 = radiusBuiten * cos;
+            double y2 = radiusBuiten * sin;
             graphics.draw(new Line2D.Double(x1,y1,x2,y2));
-            hoek+=0.18;
         }
     }
     
