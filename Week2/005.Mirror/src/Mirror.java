@@ -33,6 +33,33 @@ public class Mirror extends Application {
         graphics.setTransform(new AffineTransform());
         graphics.setBackground(Color.white);
         graphics.clearRect(0, 0, (int) canvas.getWidth(), (int) canvas.getHeight());
+
+        double widthDividedByTwo = canvas.getWidth()/2;
+        double heightDividedByTwo = canvas.getHeight()/2;
+        graphics.translate(widthDividedByTwo, heightDividedByTwo);
+        graphics.scale(1,-1);
+
+        //X-as
+        graphics.drawLine((int)-widthDividedByTwo, 0, (int)widthDividedByTwo, 0);
+        //Y-as
+        graphics.drawLine(0, (int)-heightDividedByTwo, 0, (int)heightDividedByTwo);
+
+        //Lijn Y = 2.5 * X
+        graphics.setColor(Color.red);
+        double lastY = 2.5*-widthDividedByTwo;
+        double resolution = 1;
+        for (double x = -widthDividedByTwo; x <= widthDividedByTwo; x+=resolution) {
+            double y = 2.5 * x;
+            graphics.draw(new Line2D.Double(x, y, x-resolution, lastY));
+            lastY = y;
+        }
+
+        //vierkant 100x100 met middelpunt (0,150)
+        graphics.setColor(Color.green);
+        graphics.draw(new Rectangle2D.Double(-50, 100, 100,100));
+
+        //TODO spiegel vierkant
+
     }
 
 
