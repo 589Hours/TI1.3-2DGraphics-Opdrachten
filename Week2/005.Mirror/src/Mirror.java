@@ -56,10 +56,21 @@ public class Mirror extends Application {
 
         //vierkant 100x100 met middelpunt (0,150)
         graphics.setColor(Color.green);
-        graphics.draw(new Rectangle2D.Double(-50, 100, 100,100));
+        Rectangle2D.Double rectangle = new Rectangle2D.Double(-50, 100, 100,100);
+        graphics.draw(rectangle);
 
-        //TODO spiegel vierkant
+        //Spiegelen van de vierkant
+        double k = 2.5;
+        double first= (2/(1+Math.pow(k, 2)))-1;
+        double second= (2*k)/(1+Math.pow(k, 2));
+        double third = (2*k)/(1+Math.pow(k,2));
+        double fourth= ( (2*Math.pow(k,2))/(1+Math.pow(k, 2)) )-1;
 
+        AffineTransform transform = new AffineTransform(first,second,third,fourth,0,0);
+        Shape mirroredRectangle = transform.createTransformedShape(rectangle);
+
+        graphics.setColor(Color.magenta);
+        graphics.draw(mirroredRectangle);
     }
 
 
