@@ -1,7 +1,5 @@
 import java.awt.*;
 import java.awt.geom.*;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.util.ArrayList;
 
 import javafx.animation.AnimationTimer;
@@ -9,13 +7,9 @@ import javafx.application.Application;
 
 import static javafx.application.Application.launch;
 
-import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.shape.Line;
 import javafx.stage.Stage;
-
-import javax.imageio.ImageIO;
 
 import org.jfree.fx.FXGraphics2D;
 import org.jfree.fx.ResizableCanvas;
@@ -73,13 +67,14 @@ public class Screensaver extends Application {
             int x4 = (int) line.get(3).getX();
             int y4 = (int) line.get(3).getY();
 
+            //punten zijn een beetje raar omdat ik per ongeluk een zandloper vorm de punten heb gemaakt
             //p1 to p2
             graphics.drawLine(x1, y1, x2, y2);
-            //p2 to p3
+            //p2 to p4
             graphics.drawLine(x2, y2, x4, y4);
             //p3 to p4
             graphics.drawLine(x4, y4, x3, y3);
-            //p4 to p1
+            //p3 to p1
             graphics.drawLine(x3, y3, x1, y1);
         }
 

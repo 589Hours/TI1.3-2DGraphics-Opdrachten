@@ -1,13 +1,12 @@
 import org.jfree.fx.ResizableCanvas;
 
-import java.awt.*;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
 public class Point {
     private Point2D position;
-    private double xDirection = 0.75;
-    private double yDirection = 0.75;
+    private double xDirection = 2;
+    private double yDirection = 2;
 
     public Point(Point2D position) {
         this.position = position;
