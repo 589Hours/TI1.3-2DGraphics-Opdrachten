@@ -132,17 +132,17 @@ public class VerletEngine extends Application {
 
             if (e.isControlDown()){
                 constraints.add(new DistanceConstraint(newParticle, sorted.get(2), 100));
+                constraints.add(new DistanceConstraint(newParticle, nearest, 100));
 //                constraints.add(new RopeConstraint(newParticle, sorted.get(2)));
 //                constraints.add(new RopeConstraint(newParticle, nearest));
-                return;
             } else if(e.isShiftDown()){
                 constraints.add(new DistanceConstraint(sorted.get(1), sorted.get(2)));
                 particles.remove(newParticle);
-                return;
             } else {
                 constraints.add(new DistanceConstraint(newParticle, sorted.get(2)));
+                constraints.add(new DistanceConstraint(newParticle, nearest));
             }
-            constraints.add(new DistanceConstraint(newParticle, nearest));
+
 
         } else if (e.getButton() == MouseButton.MIDDLE) {
             // Reset
