@@ -7,5 +7,8 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="fxgraphics2d-1.10" level="project" />
+    <orderEntry type="library" name="dyn4j-v3.3.0" level="project" />
+    <orderEntry type="module" module-name="Common" />
   </component>
 </module>

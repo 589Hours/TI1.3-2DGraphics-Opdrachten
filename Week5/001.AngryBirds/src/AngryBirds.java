@@ -90,12 +90,12 @@ public class AngryBirds extends Application {
         gameObjects.add( new GameObject("/background.jpg", background, new Vector2(0,0), 1.5));
 
         Body redAngryBird = new Body();
-        BodyFixture redBirdFixture = new BodyFixture(Geometry.createCircle(0.5));
+        BodyFixture redBirdFixture = new BodyFixture(Geometry.createCircle(0.3));
         redBirdFixture.setRestitution(.25);
         redAngryBird.addFixture(redBirdFixture);
         redAngryBird.setMass(MassType.NORMAL);
         world.addBody(redAngryBird);
-        gameObjects.add(new GameObject("/redAngryBird.png", redAngryBird, new Vector2(-10,-20), 0.15));
+        gameObjects.add(new GameObject("/redAngryBird.png", redAngryBird, new Vector2(-40,-30), 0.15));
     }
 
     public void draw(FXGraphics2D graphics) {
