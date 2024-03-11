@@ -1,18 +1,31 @@
 
 import java.awt.*;
 import java.awt.geom.*;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Objects;
+
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import static javafx.application.Application.launch;
+
+
 import javafx.scene.Scene;
 import javafx.scene.control.CheckBox;
+import javafx.scene.layout.Background;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
+import org.dyn4j.collision.Fixture;
+import org.dyn4j.dynamics.Body;
+import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.World;
+import org.dyn4j.geometry.Geometry;
+import org.dyn4j.geometry.MassType;
 import org.dyn4j.geometry.Vector2;
 import org.jfree.fx.FXGraphics2D;
 import org.jfree.fx.ResizableCanvas;
+
+import javax.imageio.ImageIO;
 
 public class AngryBirds extends Application {
 
@@ -34,6 +47,7 @@ public class AngryBirds extends Application {
             debugSelected = showDebug.isSelected();
         });
         mainPane.setTop(showDebug);
+
 
         canvas = new ResizableCanvas(g -> draw(g), mainPane);
         mainPane.setCenter(canvas);
@@ -65,6 +79,23 @@ public class AngryBirds extends Application {
     public void init() {
         world = new World();
         world.setGravity(new Vector2(0, -9.8));
+
+        Body ground = new Body();
+        BodyFixture groundFix = new BodyFixture(Geometry.createRectangle(10,1));
+        ground.addFixture(groundFix);
+        ground.setMass(MassType.INFINITE);
+        world.addBody(ground);
+
+        Body background = new Body();
+        gameObjects.add( new GameObject("/background.jpg", background, new Vector2(0,0), 1.5));
+
+        Body redAngryBird = new Body();
+        BodyFixture redBirdFixture = new BodyFixture(Geometry.createCircle(0.5));
+        redBirdFixture.setRestitution(.25);
+        redAngryBird.addFixture(redBirdFixture);
+        redAngryBird.setMass(MassType.NORMAL);
+        world.addBody(redAngryBird);
+        gameObjects.add(new GameObject("/redAngryBird.png", redAngryBird, new Vector2(-10,-20), 0.15));
     }
 
     public void draw(FXGraphics2D graphics) {
