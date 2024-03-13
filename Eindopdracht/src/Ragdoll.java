@@ -1,26 +1,30 @@
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
+import org.dyn4j.dynamics.DetectResult;
 import org.dyn4j.dynamics.World;
 import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.dynamics.joint.RevoluteJoint;
-import org.dyn4j.geometry.Convex;
-import org.dyn4j.geometry.Geometry;
-import org.dyn4j.geometry.MassType;
-import org.dyn4j.geometry.Vector2;
+import org.dyn4j.geometry.*;
+import org.jfree.fx.FXGraphics2D;
 
+import java.awt.geom.AffineTransform;
+import java.awt.geom.NoninvertibleTransformException;
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
+import java.util.List;
 
-public class Ragdoll {
+public class Ragdoll implements GameObject {
     private World world;
     private ArrayList<Body> bodyParts = new ArrayList<>();
     private ArrayList<Joint> joints = new ArrayList<>();
 
     public Ragdoll(World world){
         this.world = world;
-        spawnJohanRagdoll();
+        draw();
     }
 
-    public void spawnJohanRagdoll() {
+    //draw the ragdoll from Johan
+    public void draw() {
         // Head
         Body head = new Body();
         {// Fixture2
@@ -341,8 +345,24 @@ public class Ragdoll {
         return joints;
     }
 
+    //doesnt have to be used in Ragdoll
+    @Override
+    public void draw(FXGraphics2D g2d) {
+
+    }
+
+    public boolean checkIfDelete(Vector2 clickPosition){
+        for (Body bodyPart : this.bodyParts) {
+            if(bodyPart.contains(clickPosition)){
+                return true;
+            }
+        }
+        return false;
+    }
     public void deleteFromWorld() {
+        System.out.println("going to delete!");
         for (Body bodyPart : bodyParts) {
+            System.out.println("Body part being deleted!");
             world.removeBody(bodyPart);
         }
         for (Joint joint : joints) {

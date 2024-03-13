@@ -9,12 +9,21 @@ public class KeyLogger {
     public void keyPressed(KeyEvent event){
         String charFromEvent = event.getCharacter();
         switch (charFromEvent){
-            case "d":
+            case "g":
+                System.out.println("Debug activated");
                 eindopdracht.debugToggle();
                 break;
             case " ":
                 eindopdracht.pause();
                 break;
+            case "\t":
+                eindopdracht.showSpawnScreen();
+                break;
+            case "f":
+                eindopdracht.shoot();
+                break;
+            case "h":
+                eindopdracht.explode();
             default:
                 System.out.println("Unknown command");
                 break;

@@ -3,12 +3,13 @@ import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import org.dyn4j.dynamics.Body;
-import org.dyn4j.dynamics.DetectResult;
-import org.dyn4j.dynamics.World;
+import org.dyn4j.dynamics.*;
+import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.dynamics.joint.MotorJoint;
+import org.dyn4j.dynamics.joint.PrismaticJoint;
 import org.dyn4j.geometry.*;
 
+import java.awt.event.KeyListener;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
@@ -24,6 +25,7 @@ public class MousePicker {
 
     private Body body;
     private MotorJoint joint;
+    private Body target;
 
     public MousePicker(Node node) {
         EventHandler<? super MouseEvent> oldMousePressed = node.getOnMousePressed();
@@ -88,7 +90,7 @@ public class MousePicker {
                         results);
 
                 if (detect) {
-                    Body target = results.get(0).getBody();
+                    target = results.get(0).getBody();
 
                     target.setAutoSleepingEnabled(false);
                     target.setAsleep(false);
@@ -113,6 +115,24 @@ public class MousePicker {
         } catch (NoninvertibleTransformException e) {
             e.printStackTrace();
         }
+    }
+
+    public void shoot(World world) {
+        Body bullet = new Body();
+        BodyFixture bodyFixture = new BodyFixture(Geometry.createCircle(0.05));
+        bodyFixture.setDensity(15);
+        bullet.addFixture(bodyFixture);
+        bullet.setMass(MassType.NORMAL);
+        bullet.setGravityScale(0.5);
+        world.addBody(bullet);
+
+        Vector2 spawnLocation = new Vector2(this.target.getTransform().getTranslationX(), this.target.getTransform().getTranslationY());
+        bullet.getTransform().setTranslation(spawnLocation);
+        bullet.applyForce(new Force(300,0));
+    }
+
+    public Body getTarget() {
+        return target;
     }
 
 }
