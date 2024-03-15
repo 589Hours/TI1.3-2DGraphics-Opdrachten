@@ -27,7 +27,7 @@ public class VerletEngine extends Application {
     private ArrayList<Particle> particles = new ArrayList<>();
     private ArrayList<Constraint> constraints = new ArrayList<>();
     private PositionConstraint mouseConstraint = new PositionConstraint(null);
-    private String filePath = "E:\\gitCodes\\TI1.3-2DGraphics-Opdrachten\\Week4\\001.Verlet\\saves\\SavedVerletEngine.ser";
+    private String filePath = "/SavedVerletEngine.ser";
 
     @Override
     public void start(Stage stage) throws Exception {
@@ -133,8 +133,6 @@ public class VerletEngine extends Application {
             if (e.isControlDown()){
                 constraints.add(new DistanceConstraint(newParticle, sorted.get(2), 100));
                 constraints.add(new DistanceConstraint(newParticle, nearest, 100));
-//                constraints.add(new RopeConstraint(newParticle, sorted.get(2)));
-//                constraints.add(new RopeConstraint(newParticle, nearest));
             } else if(e.isShiftDown()){
                 constraints.add(new DistanceConstraint(sorted.get(1), sorted.get(2)));
                 particles.remove(newParticle);
@@ -148,13 +146,39 @@ public class VerletEngine extends Application {
             // Reset
             particles.clear();
             constraints.clear();
-            init();
+            if(e.isControlDown()){
+                drawDoek();
+            } else{
+                init();
+            }
         } else if (e.isControlDown() && e.getButton() == MouseButton.PRIMARY){
             constraints.add(new PositionConstraint(newParticle));
         } else {
             constraints.add(new DistanceConstraint(newParticle, nearest));
         }
 
+    }
+
+    private void drawDoek() {
+        int width = 6;
+        int height = 6;
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                Particle doekPunt = new Particle(new Point2D.Double(100 * x + 50, 100 * y + 50));
+                particles.add(doekPunt);
+                if (y == 0){
+                    constraints.add(new PositionConstraint(doekPunt));
+                } else {
+                    Particle particleAbove = particles.get((x*width) + (y-1));
+                    constraints.add(new RopeConstraint(doekPunt, particleAbove));
+                }
+            }
+        }
+        //the upper row doesn't need to connect to "extra" others
+        for (int i = 0; i < (width * height) - width; i++) {
+            constraints.add(new RopeConstraint(particles.get(i), particles.get(i+width)));
+        }
+        constraints.add(mouseConstraint);
     }
 
     private Particle getNearest(Point2D point) {
@@ -187,7 +211,8 @@ public class VerletEngine extends Application {
         try{
             FileOutputStream fileOutputStream = new FileOutputStream(filePath);
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
-//            objectOutputStream.writeObject();
+            objectOutputStream.writeObject(this.particles);
+            objectOutputStream.writeObject(this.constraints);
             System.out.println("Saved!");
             objectOutputStream.close();
         } catch (IOException e){
@@ -199,9 +224,8 @@ public class VerletEngine extends Application {
         try{
             FileInputStream fis = new FileInputStream(filePath);
             ObjectInputStream ois = new ObjectInputStream(fis);
-
-
-
+            this.particles = (ArrayList<Particle>) ois.readObject();
+            this.constraints = (ArrayList<Constraint>) ois.readObject();
         } catch (Exception e) {
             e.printStackTrace();
         }
