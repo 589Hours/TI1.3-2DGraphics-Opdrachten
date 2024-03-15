@@ -226,6 +226,7 @@ public class VerletEngine extends Application {
             ObjectInputStream ois = new ObjectInputStream(fis);
             this.particles = (ArrayList<Particle>) ois.readObject();
             this.constraints = (ArrayList<Constraint>) ois.readObject();
+            this.constraints.add(mouseConstraint);
         } catch (Exception e) {
             e.printStackTrace();
         }
