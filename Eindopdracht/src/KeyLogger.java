@@ -24,6 +24,7 @@ public class KeyLogger {
                 break;
             case "h":
                 eindopdracht.explode();
+                break;
             default:
                 System.out.println("Unknown command");
                 break;
