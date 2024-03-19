@@ -31,7 +31,8 @@ public class AngryBirds extends Application {
 
     private ResizableCanvas canvas;
     private World world;
-    private MousePicker mousePicker;
+    private Body redAngryBird;
+    private Vector2 slingStartVector;
     private Camera camera;
     private boolean debugSelected = false;
     private ArrayList<GameObject> gameObjects = new ArrayList<>();
@@ -54,7 +55,27 @@ public class AngryBirds extends Application {
         FXGraphics2D g2d = new FXGraphics2D(canvas.getGraphicsContext2D());
 
         camera = new Camera(canvas, g -> draw(g), g2d);
-        mousePicker = new MousePicker(canvas);
+
+        canvas.setOnMousePressed(event -> {
+            if (event.isControlDown())
+                init();
+
+
+            if (!event.isShiftDown())
+                return;
+
+            slingStartVector = new Vector2(event.getX(), event.getY());
+        });
+
+        canvas.setOnMouseReleased(event -> {
+            if(!event.isShiftDown())
+                return;
+
+            Vector2 slingForce = new Vector2(slingStartVector.x-event.getX(), event.getY()-slingStartVector.y);
+            //set normal so he flings away
+            this.redAngryBird.setMass(MassType.NORMAL);
+            this.redAngryBird.applyForce(slingForce);
+        });
 
         new AnimationTimer() {
             long last = -1;
@@ -81,21 +102,50 @@ public class AngryBirds extends Application {
         world.setGravity(new Vector2(0, -9.8));
 
         Body ground = new Body();
-        BodyFixture groundFix = new BodyFixture(Geometry.createRectangle(10,1));
+        BodyFixture groundFix = new BodyFixture(Geometry.createRectangle(100,1));
         ground.addFixture(groundFix);
         ground.setMass(MassType.INFINITE);
+        ground.getTransform().setTranslation(0, -4.25);
         world.addBody(ground);
 
         Body background = new Body();
         gameObjects.add( new GameObject("/background.jpg", background, new Vector2(0,0), 1.5));
 
-        Body redAngryBird = new Body();
-        BodyFixture redBirdFixture = new BodyFixture(Geometry.createCircle(0.3));
+        Body slingshot = new Body();
+        slingshot.getTransform().setTranslation(-5.1,-3);
+        gameObjects.add(new GameObject("/slingshot.png", slingshot, new Vector2(0,0), 0.6));
+
+        this.redAngryBird = new Body();
+        redAngryBird.setUserData("redBird");
+        redAngryBird.getTransform().setTranslation(-5, -2.5);
+        BodyFixture redBirdFixture = new BodyFixture(Geometry.createCircle(0.2));
         redBirdFixture.setRestitution(.25);
+        redBirdFixture.setDensity(2);
         redAngryBird.addFixture(redBirdFixture);
-        redAngryBird.setMass(MassType.NORMAL);
+        //set infinite so he is static in air
+        redAngryBird.setMass(MassType.INFINITE);
         world.addBody(redAngryBird);
-        gameObjects.add(new GameObject("/redAngryBird.png", redAngryBird, new Vector2(-40,-30), 0.15));
+
+        gameObjects.add(new GameObject("/redAngryBird.png", redAngryBird, new Vector2(-40,-30), 0.12));
+
+        //wall height
+        for (int y = 0; y < 4; y++) {
+            //amount of walls
+            for (int x = 5; x > 0; x--) {
+                //skip wall 2 and 4 for 2 gaps.
+                if (x == 2 || x == 4)
+                    continue;
+
+                Body woodBlock = new Body();
+                BodyFixture woodBlockFixture = new BodyFixture(Geometry.createRectangle(0.5,0.5));
+                woodBlockFixture.setFriction(2);
+                woodBlock.addFixture(woodBlockFixture);
+                woodBlock.setMass(MassType.NORMAL);
+                woodBlock.getTransform().setTranslation(0.6+(0.6*x), -0.6+(-0.6*y));
+                world.addBody(woodBlock);
+                gameObjects.add(new GameObject("/woodBlock.png", woodBlock, new Vector2(0,0), 0.5));
+            }
+        }
     }
 
     public void draw(FXGraphics2D graphics) {
@@ -121,8 +171,10 @@ public class AngryBirds extends Application {
     }
 
     public void update(double deltaTime) {
-        mousePicker.update(world, camera.getTransform((int) canvas.getWidth(), (int) canvas.getHeight()), 100);
+
         world.update(deltaTime);
+        //if you want to launch the bird mousePicker shouldn't be used
+
     }
 
     public static void main(String[] args) {

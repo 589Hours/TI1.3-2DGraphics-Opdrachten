@@ -44,4 +44,8 @@ public class GameObject {
         g2d.drawImage(image, tx, null);
 
     }
+
+    public Body getBody() {
+        return body;
+    }
 }
