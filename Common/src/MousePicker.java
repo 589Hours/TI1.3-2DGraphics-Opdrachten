@@ -123,4 +123,5 @@ public class MousePicker {
     public Point2D getMousePos() {
         return mousePos;
     }
+    public MotorJoint getJoint(){return this.joint;}
 }

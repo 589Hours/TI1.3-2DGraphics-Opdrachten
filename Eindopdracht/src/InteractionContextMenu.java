@@ -30,9 +30,9 @@ public class InteractionContextMenu extends ContextMenu {
         this.getItems().addAll(menuItems);
     }
     private void fillMenuItems(){
+        //didn't get to fix delete, so I kind of left it behind
 //        menuItems.add(new MenuItem("Delete"));
         menuItems.add(new MenuItem("Reset"));
-        menuItems.add(new MenuItem("Freeze"));
         eventHandlers();
     }
 
@@ -67,6 +67,7 @@ public class InteractionContextMenu extends ContextMenu {
         With Frozen I mean being Frozen in place.
         will leave freeze for what it is now. Have to think about how I will keep track of what is frozen
         without adding a boolean for every body in a ragdoll.
+        I chose to skip freeze, as there were more important things as fixing the explosion.
     */
     private void freezeEvent(ActionEvent event) {
         Body weldPosition = new Body();

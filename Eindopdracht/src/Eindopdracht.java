@@ -8,14 +8,19 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 import org.dyn4j.dynamics.*;
+import org.dyn4j.dynamics.joint.MotorJoint;
 import org.dyn4j.geometry.*;
 import org.jfree.fx.FXGraphics2D;
 import org.jfree.fx.ResizableCanvas;
 
+import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.Rectangle;
 import java.awt.geom.*;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Objects;
 
 public class Eindopdracht extends Application {
     private ResizableCanvas canvas;
@@ -24,6 +29,7 @@ public class Eindopdracht extends Application {
     private MousePicker mousePicker;
     private Camera camera;
     private KeyLogger keyLogger;
+    private BufferedImage background;
     private boolean debugSelected = false;
     private boolean paused = false;
     private ArrayList<GameObject> gameObjects;
@@ -37,6 +43,7 @@ public class Eindopdracht extends Application {
 //            debugSelected = !debugSelected;
 //        });
 //        mainPane.setTop(showDebug);
+
         canvas = new ResizableCanvas(g -> draw(g), mainPane);
         mainPane.setCenter(canvas);
         g2d = new FXGraphics2D(canvas.getGraphicsContext2D());
@@ -68,6 +75,8 @@ public class Eindopdracht extends Application {
             }
         }.start();
 
+        this.background = ImageIO.read(Objects.requireNonNull(getClass().getResource("background.jpg")));
+
         stage.setScene(new Scene(mainPane, 1920, 1080));
         stage.setTitle("Eindopdracht 2D graphics");
         stage.show();
@@ -89,12 +98,62 @@ public class Eindopdracht extends Application {
         floor.setMass(MassType.INFINITE);
         floor.getTransform().setTranslation(0,-5);
         world.addBody(floor);
+        gameObjects.add(new Particle("greyBlock.png", floor, 50, new Vector2(0,24)));
 
         spawnRagdoll();
         spawnPistol();
         spawnGrenade();
     }
 
+    public void update(double deltaTime) {
+        if(paused)
+            return;
+
+        mousePicker.update(world, camera.getTransform((int) canvas.getWidth(), (int) canvas.getHeight()), 100);
+
+        for (Iterator<GameObject> iterator = gameObjects.iterator(); iterator.hasNext();) {
+            GameObject gameObject = iterator.next();
+
+            if(gameObject instanceof Bomb){
+                Bomb bomb = (Bomb) gameObject;
+                if (bomb.isExploded()){
+                    gameObjects.remove(bomb);
+                    world.removeBody(bomb.getBody());
+
+                    break;
+                } else if (bomb.isExploding()){
+                    world.removeBody(bomb.getBody());
+                    checkIntersection(bomb);
+                }
+                bomb.updateExplode(deltaTime);
+            }
+        }
+        world.update(deltaTime);
+    }
+
+    public void draw(FXGraphics2D graphics) {
+        graphics.setTransform(new AffineTransform());
+        graphics.setColor(Color.white);
+        graphics.clearRect(0,0, 1920, 1080);
+
+        graphics.drawImage(this.background, new AffineTransform(), null);
+        graphics.setPaint(new TexturePaint(this.background, new Rectangle2D.Double(
+                0, canvas.getHeight(), background.getWidth()/2.0, background.getHeight()/2.0
+        )));
+
+        graphics.setTransform(camera.getTransform((int)canvas.getWidth(), (int)canvas.getHeight()));
+        graphics.scale(1,-1);
+
+
+
+        for (GameObject gameObject : gameObjects) {
+            gameObject.draw(graphics);
+        }
+        if (debugSelected){
+            DebugDraw.draw(graphics, world, 100);
+        }
+
+    }
     private void controlAlert() {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setHeaderText("For controls press P");
@@ -105,6 +164,7 @@ public class Eindopdracht extends Application {
     private void spawnRagdoll() {
         gameObjects.add(new Ragdoll(world, new Vector2(0,0), 0.5));
     }
+
     private void spawnPistol() {
         Body weapon = new Body();
         //to identify if the body is a weapon or not
@@ -132,24 +192,6 @@ public class Eindopdracht extends Application {
         world.addBody(grenade);
         gameObjects.add(new Bomb("/grenade.png", grenade, new Vector2(0,0), 0.15, 0.8));
     }
-
-    public void draw(FXGraphics2D graphics) {
-        graphics.setTransform(new AffineTransform());
-        graphics.setColor(Color.white);
-        graphics.clearRect(0,0, 1920, 1080);
-
-        graphics.setTransform(camera.getTransform((int)canvas.getWidth(), (int)canvas.getHeight()));
-        graphics.scale(1,-1);
-
-        for (GameObject gameObject : gameObjects) {
-            gameObject.draw(graphics);
-        }
-        if (debugSelected){
-            DebugDraw.draw(graphics, world, 100);
-        }
-
-    }
-
     public void explode(){
         Body targetBody = mousePicker.getTarget();
         if (targetBody == null)
@@ -166,6 +208,7 @@ public class Eindopdracht extends Application {
             }
         }
     }
+
     public void shoot(){
         Body target = mousePicker.getTarget();
         Object userData = target.getUserData();
@@ -198,32 +241,6 @@ public class Eindopdracht extends Application {
 
         bullet.applyForce(new Force(Math.cos(rotation)*300,Math.sin(rotation)*300));
 
-    }
-
-    public void update(double deltaTime) {
-        if(paused)
-            return;
-
-        mousePicker.update(world, camera.getTransform((int) canvas.getWidth(), (int) canvas.getHeight()), 100);
-
-        for (Iterator<GameObject> iterator = gameObjects.iterator(); iterator.hasNext();) {
-            GameObject gameObject = iterator.next();
-
-            if(gameObject instanceof Bomb){
-                Bomb bomb = (Bomb) gameObject;
-                if (bomb.isExploded()){
-                    gameObjects.remove(bomb);
-                    world.removeBody(bomb.getBody());
-
-                    break;
-                } else if (bomb.isExploding()){
-                    world.removeBody(bomb.getBody());
-                    checkIntersection(bomb);
-                }
-                bomb.updateExplode(deltaTime);
-            }
-        }
-        world.update(deltaTime);
     }
     private Body testPrintExplosion;
     private void checkIntersection(Bomb bomb) {
@@ -272,14 +289,32 @@ public class Eindopdracht extends Application {
                 double initialForce = bomb.getForce();
 
                 direction.multiply(initialForce * bomb.getRadius()/1.5);
-                result.getBody().applyForce(direction);
+                resultBody.applyForce(direction);
             }
         }
+    }
+
+    public void rotateRight() {
+        MotorJoint motorJoint = mousePicker.getJoint();
+
+        if (motorJoint == null)
+            return;
+
+        motorJoint.setAngularTarget(motorJoint.getAngularTarget()+0.2);
+    }
+    public void rotateLeft() {
+        MotorJoint motorJoint = mousePicker.getJoint();
+
+        if (motorJoint == null)
+            return;
+
+        motorJoint.setAngularTarget(motorJoint.getAngularTarget()-0.2);
     }
 
     public void reset(){
         init();
     }
+
     public void showSpawnScreen() {
         Stage itemScreen = new Stage();
         BorderPane borderPane = new BorderPane();

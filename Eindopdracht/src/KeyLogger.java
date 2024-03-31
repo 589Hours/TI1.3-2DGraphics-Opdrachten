@@ -43,6 +43,13 @@ public class KeyLogger {
                 break;
             case "p":
                 showControls();
+                break;
+            case "d":
+                eindopdracht.rotateRight();
+                break;
+            case "a":
+                eindopdracht.rotateLeft();
+                break;
             //this is more for debugging since I forgot to turn the keyLogger option on for canvas
             default:
                 System.out.println("Unknown command");
@@ -59,6 +66,8 @@ public class KeyLogger {
         controls.getChildren().add(new Label("tab: Shows you a item spawn screen"));
         controls.getChildren().add(new Label("f: Shoots the gun you are holding"));
         controls.getChildren().add(new Label("h: explodes the explosive you are holding"));
+        controls.getChildren().add(new Label("a: while holding gun rotate it left"));
+        controls.getChildren().add(new Label("d: while holding gun rotate it right"));
         controls.setAlignment(Pos.CENTER);
 
         pane.setCenter(controls);
