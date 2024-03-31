@@ -1,32 +1,89 @@
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.BodyFixture;
-import org.dyn4j.dynamics.DetectResult;
 import org.dyn4j.dynamics.World;
 import org.dyn4j.dynamics.joint.Joint;
 import org.dyn4j.dynamics.joint.RevoluteJoint;
 import org.dyn4j.geometry.*;
 import org.jfree.fx.FXGraphics2D;
 
+import javax.imageio.ImageIO;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.NoninvertibleTransformException;
-import java.awt.geom.Point2D;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Ragdoll implements GameObject {
     private World world;
-    private ArrayList<Body> bodyParts = new ArrayList<>();
+    private Vector2 offset;
+    private double scale;
+    private String[] imagePaths;
+    private BufferedImage[] images;
+    private Map<Body, Integer> bodyParts = new HashMap<>();
     private ArrayList<Joint> joints = new ArrayList<>();
 
-    public Ragdoll(World world){
+    public Ragdoll(World world, Vector2 offset, double scale){
         this.world = world;
-        draw();
+        this.offset = offset;
+        this.scale = scale;
+        imagePaths = new String[]{
+                "chest.png", "head.png",
+                "upperArmL.png", "underArmL.png",
+                "upperArmR.png", "underArmR.png",
+                "upperLegL.png", "underLegL.png",
+                "upperLegR.png", "underLegR.png"
+        };
+        this.images = new BufferedImage[10];
+        spawn();
+        prepareImages();
+        setDensityForRagdoll(10);
+    }
+
+    private void prepareImages() {
+        for (int i = 0; i < imagePaths.length; i++) {
+            try{
+                BufferedImage image = ImageIO.read(getClass().getResource("ragdoll/" + imagePaths[i]));
+                images[i] = image;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
     }
 
     //draw the ragdoll from Johan
-    public void draw() {
+
+    @Override
+    public void draw(FXGraphics2D g2d) {
+        for (Body body : bodyParts.keySet()) {
+            int value = bodyParts.get(body);
+            if (value < 0)
+                continue;
+
+            BufferedImage image = images[value];
+
+            if (image == null) {
+                return;
+            }
+
+            AffineTransform tx = new AffineTransform();
+            tx.translate(body.getTransform().getTranslationX() * 100, body.getTransform().getTranslationY() * 100);
+            tx.rotate(body.getTransform().getRotation());
+            tx.scale(scale, -scale);
+            tx.translate(offset.x, offset.y);
+
+            tx.translate(-image.getWidth() / 2, -image.getHeight() / 2);
+            g2d.drawImage(image, tx, null);
+        }
+
+
+
+    }
+    public void spawn() {
         // Head
         Body head = new Body();
+        head.setUserData("ragdoll");
         {// Fixture2
             Convex c = Geometry.createCircle(0.25);
             BodyFixture bf = new BodyFixture(c);
@@ -35,10 +92,11 @@ public class Ragdoll implements GameObject {
         head.setMass(MassType.NORMAL);
         world.addBody(head);
 
-        bodyParts.add(head);
+        bodyParts.put(head, 1);
 
         // Torso
         Body torso = new Body();
+        torso.setUserData("ragdoll");
         {// Fixture4
             Convex c = Geometry.createRectangle(0.5, 1.0);
             BodyFixture bf = new BodyFixture(c);
@@ -54,10 +112,11 @@ public class Ragdoll implements GameObject {
         torso.setMass(MassType.NORMAL);
         world.addBody(torso);
 
-        bodyParts.add(torso);
+        bodyParts.put(torso, 0);
 
         // Right Humerus
         Body rightHumerus = new Body();
+        rightHumerus.setUserData("ragdoll");
         {// Fixture5
             Convex c = Geometry.createRectangle(0.25, 0.5);
             BodyFixture bf = new BodyFixture(c);
@@ -67,10 +126,11 @@ public class Ragdoll implements GameObject {
         rightHumerus.setMass(MassType.NORMAL);
         world.addBody(rightHumerus);
 
-        bodyParts.add(rightHumerus);
+        bodyParts.put(rightHumerus, 4);
 
         // Right Ulna
         Body rightUlna = new Body();
+        rightUlna.setUserData("ragdoll");
         {// Fixture6
             Convex c = Geometry.createRectangle(0.25, 0.4);
             BodyFixture bf = new BodyFixture(c);
@@ -80,10 +140,11 @@ public class Ragdoll implements GameObject {
         rightUlna.setMass(MassType.NORMAL);
         world.addBody(rightUlna);
 
-        bodyParts.add(rightUlna);
+        bodyParts.put(rightUlna, 5);
 
         // Neck
         Body neck = new Body();
+        neck.setUserData("ragdoll");
         {// Fixture7
             Convex c = Geometry.createRectangle(0.15, 0.2);
             BodyFixture bf = new BodyFixture(c);
@@ -93,10 +154,11 @@ public class Ragdoll implements GameObject {
         neck.setMass(MassType.NORMAL);
         world.addBody(neck);
 
-        bodyParts.add(neck);
+        bodyParts.put(neck, -1);
 
         // Left Humerus
         Body leftHumerus = new Body();
+        leftHumerus.setUserData("ragdoll");
         {// Fixture9
             Convex c = Geometry.createRectangle(0.25, 0.5);
             BodyFixture bf = new BodyFixture(c);
@@ -106,10 +168,11 @@ public class Ragdoll implements GameObject {
         leftHumerus.setMass(MassType.NORMAL);
         world.addBody(leftHumerus);
 
-        bodyParts.add(leftHumerus);
+        bodyParts.put(leftHumerus, 2);
 
         // Left Ulna
         Body leftUlna = new Body();
+        leftUlna.setUserData("ragdoll");
         {// Fixture11
             Convex c = Geometry.createRectangle(0.25, 0.4);
             BodyFixture bf = new BodyFixture(c);
@@ -119,10 +182,11 @@ public class Ragdoll implements GameObject {
         leftUlna.setMass(MassType.NORMAL);
         world.addBody(leftUlna);
 
-        bodyParts.add(leftUlna);
+        bodyParts.put(leftUlna, 3);
 
         // Right Femur
         Body rightFemur = new Body();
+        rightFemur.setUserData("ragdoll");
         {// Fixture12
             Convex c = Geometry.createRectangle(0.25, 0.75);
             BodyFixture bf = new BodyFixture(c);
@@ -132,10 +196,11 @@ public class Ragdoll implements GameObject {
         rightFemur.setMass(MassType.NORMAL);
         world.addBody(rightFemur);
 
-        bodyParts.add(rightFemur);
+        bodyParts.put(rightFemur, 8);
 
         // Left Femur
         Body leftFemur = new Body();
+        leftFemur.setUserData("ragdoll");
         {// Fixture13
             Convex c = Geometry.createRectangle(0.25, 0.75);
             BodyFixture bf = new BodyFixture(c);
@@ -145,10 +210,11 @@ public class Ragdoll implements GameObject {
         leftFemur.setMass(MassType.NORMAL);
         world.addBody(leftFemur);
 
-        bodyParts.add(leftFemur);
+        bodyParts.put(leftFemur, 6);
 
         // Right Tibia
         Body rightTibia = new Body();
+        rightTibia.setUserData("ragdoll");
         {// Fixture14
             Convex c = Geometry.createRectangle(0.25, 0.5);
             BodyFixture bf = new BodyFixture(c);
@@ -158,10 +224,11 @@ public class Ragdoll implements GameObject {
         rightTibia.setMass(MassType.NORMAL);
         world.addBody(rightTibia);
 
-        bodyParts.add(rightTibia);
+        bodyParts.put(rightTibia, 9);
 
         // Left Tibia
         Body leftTibia = new Body();
+        leftTibia.setUserData("ragdoll");
         {// Fixture15
             Convex c = Geometry.createRectangle(0.25, 0.5);
             BodyFixture bf = new BodyFixture(c);
@@ -171,7 +238,7 @@ public class Ragdoll implements GameObject {
         leftTibia.setMass(MassType.NORMAL);
         world.addBody(leftTibia);
 
-        bodyParts.add(leftTibia);
+        bodyParts.put(leftTibia, 7);
 
         // Head to Neck
         RevoluteJoint headToNeck = new RevoluteJoint(head, neck, new Vector2(0.01, -0.2));
@@ -303,56 +370,15 @@ public class Ragdoll implements GameObject {
 
         joints.add(leftFemurToLeftTibia);
     }
-    public void spawnMyRagdoll() {
-        //head
-        Body head = new Body();
-        {
-            Convex c = Geometry.createRectangle(0.25, 0.25);
-            BodyFixture bf = new BodyFixture(c);
-            head.addFixture(bf);
+
+    private void setDensityForRagdoll(int density) {
+        for (Body body : bodyParts.keySet()) {
+            body.getFixture(0).setDensity(density);
         }
-        head.setMass(MassType.NORMAL);
-        world.addBody(head);
-
-        //torso
-        Body torso = new Body();
-        {
-            Convex c = Geometry.createRectangle(0.3, .6);
-            BodyFixture bf = new BodyFixture(c);
-            torso.addFixture(bf);
-        }
-        torso.translate(0, 0.375);
-        torso.setMass(MassType.NORMAL);
-        world.addBody(torso);
-
-        //head with torso
-        RevoluteJoint headToTorso = new RevoluteJoint(head, torso, new Vector2(0.01, -0.1));
-        headToTorso.setLimitEnabled(false);
-        headToTorso.setLimits(Math.toRadians(0.0), Math.toRadians(0.0));
-        headToTorso.setReferenceAngle(Math.toRadians(0.0));
-        headToTorso.setMotorEnabled(false);
-        headToTorso.setMotorSpeed(Math.toRadians(0.0));
-        headToTorso.setMaximumMotorTorque(0.0);
-        headToTorso.setCollisionAllowed(false);
-        world.addJoint(headToTorso);
-    }
-
-    public ArrayList<Body> getBodyParts() {
-        return bodyParts;
-    }
-
-    public ArrayList<Joint> getJoints() {
-        return joints;
-    }
-
-    //doesnt have to be used in Ragdoll
-    @Override
-    public void draw(FXGraphics2D g2d) {
-
     }
 
     public boolean checkIfDelete(Vector2 clickPosition){
-        for (Body bodyPart : this.bodyParts) {
+        for (Body bodyPart : this.bodyParts.keySet()) {
             if(bodyPart.contains(clickPosition)){
                 return true;
             }
@@ -361,7 +387,7 @@ public class Ragdoll implements GameObject {
     }
     public void deleteFromWorld() {
         System.out.println("going to delete!");
-        for (Body bodyPart : bodyParts) {
+        for (Body bodyPart : bodyParts.keySet()) {
             System.out.println("Body part being deleted!");
             world.removeBody(bodyPart);
         }

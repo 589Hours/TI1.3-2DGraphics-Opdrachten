@@ -1,4 +1,11 @@
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.Label;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 
 public class KeyLogger {
     Eindopdracht eindopdracht;
@@ -8,6 +15,11 @@ public class KeyLogger {
 
     public void keyPressed(KeyEvent event){
         String charFromEvent = event.getCharacter();
+
+        //doesn't work for some reason
+        if (event.getCode() == KeyCode.ESCAPE)
+            showControls();
+
         switch (charFromEvent){
             //toggle debug
             case "g":
@@ -29,10 +41,32 @@ public class KeyLogger {
             case "h":
                 eindopdracht.explode();
                 break;
+            case "p":
+                showControls();
             //this is more for debugging since I forgot to turn the keyLogger option on for canvas
             default:
                 System.out.println("Unknown command");
                 break;
         }
+    }
+
+    private void showControls() {
+        Stage stage = new Stage();
+        BorderPane pane = new BorderPane();
+        VBox controls = new VBox();
+        controls.getChildren().add(new Label("g: Toggle debug"));
+        controls.getChildren().add(new Label("Space bar: Pause/Freeze game"));
+        controls.getChildren().add(new Label("tab: Shows you a item spawn screen"));
+        controls.getChildren().add(new Label("f: Shoots the gun you are holding"));
+        controls.getChildren().add(new Label("h: explodes the explosive you are holding"));
+        controls.setAlignment(Pos.CENTER);
+
+        pane.setCenter(controls);
+        Scene scene = new Scene(pane);
+        stage.setTitle("controls");
+        stage.setScene(scene);
+        stage.setHeight(200);
+        stage.setWidth(500);
+        stage.show();
     }
 }

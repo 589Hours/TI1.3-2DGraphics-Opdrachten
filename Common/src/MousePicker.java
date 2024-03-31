@@ -116,23 +116,11 @@ public class MousePicker {
             e.printStackTrace();
         }
     }
-
-    public void shoot(World world) {
-        Body bullet = new Body();
-        BodyFixture bodyFixture = new BodyFixture(Geometry.createCircle(0.05));
-        bodyFixture.setDensity(15);
-        bullet.addFixture(bodyFixture);
-        bullet.setMass(MassType.NORMAL);
-        bullet.setGravityScale(0.5);
-        world.addBody(bullet);
-
-        Vector2 spawnLocation = new Vector2(this.target.getTransform().getTranslationX(), this.target.getTransform().getTranslationY());
-        bullet.getTransform().setTranslation(spawnLocation);
-        bullet.applyForce(new Force(300,0));
-    }
-
     public Body getTarget() {
         return target;
     }
 
+    public Point2D getMousePos() {
+        return mousePos;
+    }
 }
